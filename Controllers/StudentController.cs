@@ -21,7 +21,7 @@ namespace CollegeProject.Controllers
                 StudentName = temp.StudentName,
                 Email = temp.Email,
                 Address = temp.Address
-            });
+            }).ToList(); //Added inorder for it to configure with XML
 
             return Ok(students);
             //return "Sample student name";
