@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using CollegeProject.Models;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.JsonPatch;
 
 namespace CollegeProject.Controllers
 {
@@ -187,6 +188,43 @@ namespace CollegeProject.Controllers
             existingStudent.StudentName = model.StudentName;
             existingStudent.Email = model.Email;
             existingStudent.Address = model.Address;
+
+            return NoContent(); //204 success to indicate record updated but no output needed to show
+        }
+
+        //We need to install two libraries - JSONPatch and NewtonsoftJson from Nuget Package Manager
+        [HttpPatch]
+        [Route("{studentID:int}/UpdatePartial")]
+        //api/student/id/UpdatePartial
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        public ActionResult PartialUpdateStudent(int studentID, [FromBody] JsonPatchDocument<StudentDTO> patchDocument)
+        {
+            if (patchDocument == null || studentID <= 0)
+            {
+                return BadRequest();
+            }
+            var existingStudent = CollegeRepository.Students.Where(temp => temp.StudentID == studentID).FirstOrDefault();
+            if (existingStudent == null)
+            {
+                return NotFound();
+            }
+            var studentDTO = new StudentDTO
+            {
+                StudentID = existingStudent.StudentID,
+                StudentName = existingStudent.StudentName,
+                Email = existingStudent.Email,
+                Address = existingStudent.Address
+            };
+            patchDocument.ApplyTo(studentDTO, ModelState);
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            existingStudent.StudentName = studentDTO.StudentName;
+            existingStudent.Email = studentDTO.Email;
+            existingStudent.Address = studentDTO.Address;
 
             return NoContent(); //204 success to indicate record updated but no output needed to show
         }
