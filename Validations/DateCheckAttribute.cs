@@ -11,7 +11,7 @@ namespace CollegeProject.Validations
             {
                 return new ValidationResult("The date must be not less than today");
             }
-            return ValidationResult.Success;
+            return ValidationResult.Success; //comment
         }
 
     }
