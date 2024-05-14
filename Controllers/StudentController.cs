@@ -111,28 +111,6 @@ namespace CollegeProject.Controllers
             return Ok(studentDTO);
         }
 
-        [HttpDelete]
-        [Route("{id}", Name = "DeleteStudentById")]
-        [ProducesResponseType(200)]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(404)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public ActionResult<bool> DeleteStudent(int id)
-        {
-            if(id <= 0)
-            {
-                return BadRequest();
-            }
-            var student = CollegeRepository.Students.Where(temp => temp.StudentID == id).FirstOrDefault();
-            if(student == null)
-            {
-                return NotFound($"Student with {id} not found");
-            }
-
-            CollegeRepository.Students.Remove(student);
-            return Ok(true);
-        }
-
         [HttpPost]
         [Route("Create")]
         [ProducesResponseType(StatusCodes.Status201Created)]
@@ -227,6 +205,29 @@ namespace CollegeProject.Controllers
             existingStudent.Address = studentDTO.Address;
 
             return NoContent(); //204 success to indicate record updated but no output needed to show
+        }
+
+        [HttpDelete]
+        [Route("Delete/{StudentID}", Name = "DeleteStudentById")]
+        //Student/Delete/{StudentID}
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public ActionResult<bool> DeleteStudent(int StudentID)
+        {
+            if (StudentID <= 0)
+            {
+                return BadRequest();
+            }
+            var student = CollegeRepository.Students.Where(temp => temp.StudentID == StudentID).FirstOrDefault();
+            if (student == null)
+            {
+                return NotFound($"Student with {StudentID} not found");
+            }
+
+            CollegeRepository.Students.Remove(student);
+            return Ok(true);
         }
     }
 }
