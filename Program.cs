@@ -1,4 +1,10 @@
+using CollegeProject.MyLogging;
+
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Logging.ClearProviders(); //Removes all types of logging mechanisms from application
+builder.Logging.AddConsole(); //Logs only to console
+//builder.Logging.AddDebug();//Logs only to debug
 
 // Add services to the container.
 //Content Negotiation -> How to now allow other response types like xml, bla bla...
@@ -9,6 +15,10 @@ builder.Services.AddControllers(options => options.ReturnHttpNotAcceptable = tru
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+//For loosely coupled Dependency Injection - You will just have to make your changes at one place...
+//Easier to maintain
+builder.Services.AddScoped<IMyLoggerr, LogToFile>();
 
 var app = builder.Build();
 

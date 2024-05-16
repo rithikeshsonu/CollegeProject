@@ -2,6 +2,7 @@
 using CollegeProject.Models;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.JsonPatch;
+using CollegeProject.MyLogging;
 
 namespace CollegeProject.Controllers
 {
@@ -10,11 +11,26 @@ namespace CollegeProject.Controllers
 
     public class StudentController : ControllerBase
     {
+        //Custom Logging implemented using Dependency Injection - Loosely coupled..
+        /*private readonly IMyLoggerr _myLoggerr;
+        public StudentController(IMyLoggerr myLoggerr)
+        {
+            _myLoggerr = myLoggerr;
+        }
+        */
+        private readonly ILogger<StudentController> _logger;
+        public StudentController(ILogger<StudentController> logger)
+        {
+            _logger = logger;
+        }
+
         [HttpGet]
         [Route("All", Name = "GetAllStudents")]
         [ProducesResponseType(200)]
         public ActionResult<IEnumerable<StudentDTO>> GetStudents()
         {
+            //_myLoggerr.Log("Your logging message"); //for custom Dependency Injection
+            _logger.LogInformation("Get Students method started");
             var students = CollegeRepository.Students.Select(temp => new StudentDTO()
             {
                 StudentID = temp.StudentID,
@@ -59,6 +75,7 @@ namespace CollegeProject.Controllers
         {
             if (id <= 0)
             {
+                _logger.LogWarning("Bad request");
                 return BadRequest();
             }
 
@@ -66,6 +83,7 @@ namespace CollegeProject.Controllers
 
             if (student == null)
             {
+                _logger.LogError("Student with id not found");
                 return NotFound($"Student with id = {id} not found");
             }
             var studentDTO = new StudentDTO

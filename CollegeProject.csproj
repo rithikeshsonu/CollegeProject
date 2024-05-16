@@ -9,6 +9,7 @@
   <ItemGroup>
     <Compile Remove="Controllers\ValuesController.cs" />
     <Compile Remove="Controllers\WeatherForecastController.cs" />
+    <Compile Remove="MyLogging\IMyLogger.cs" />
     <Compile Remove="WeatherForecast.cs" />
   </ItemGroup>
 
