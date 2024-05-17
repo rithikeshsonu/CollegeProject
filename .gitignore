@@ -3,6 +3,11 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
+#Ignore Log folder
+#Log/
+#Ignore Log files - All text files
+#text.txt
+
 # User-specific files
 *.rsuser
 *.suo
@@ -12,7 +17,7 @@
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
-
+log
 # Mono auto generated files
 mono_crash.*
 
