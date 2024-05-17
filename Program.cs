@@ -4,7 +4,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Logging.ClearProviders(); //Removes all types of logging mechanisms from application
 builder.Logging.AddConsole(); //Logs only to console
-//builder.Logging.AddDebug();//Logs only to debug
+builder.Logging.AddDebug();//Logs only to debug
 
 // Add services to the container.
 //Content Negotiation -> How to now allow other response types like xml, bla bla...
