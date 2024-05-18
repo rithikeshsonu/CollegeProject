@@ -3,6 +3,7 @@ using CollegeProject.Models;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.JsonPatch;
 using CollegeProject.MyLogging;
+using CollegeProject.Data;
 
 namespace CollegeProject.Controllers
 {
@@ -19,9 +20,11 @@ namespace CollegeProject.Controllers
         }
         */
         private readonly ILogger<StudentController> _logger;
-        public StudentController(ILogger<StudentController> logger)
+        private readonly CollegeDBContext _collegeDBContext;
+        public StudentController(ILogger<StudentController> logger, CollegeDBContext collegeDBContext)
         {
             _logger = logger;
+            _collegeDBContext = collegeDBContext;
         }
 
         [HttpGet]
@@ -31,12 +34,13 @@ namespace CollegeProject.Controllers
         {
             //_myLoggerr.Log("Your logging message"); //for custom Dependency Injection
             _logger.LogInformation("Get Students method started");
-            var students = CollegeRepository.Students.Select(temp => new StudentDTO()
+            var students = _collegeDBContext.Students.Select(temp => new StudentDTO()
             {
                 StudentID = temp.StudentID,
                 StudentName = temp.StudentName,
                 Email = temp.Email,
-                Address = temp.Address
+                Address = temp.Address,
+                DOB = temp.DOB
             }).ToList(); //Added inorder for it to configure with XML
 
             return Ok(students);
@@ -79,7 +83,7 @@ namespace CollegeProject.Controllers
                 return BadRequest();
             }
 
-            var student = CollegeRepository.Students.Where(temp => temp.StudentID == id).FirstOrDefault();
+            var student = _collegeDBContext.Students.Where(temp => temp.StudentID == id).FirstOrDefault();
 
             if (student == null)
             {
@@ -91,7 +95,8 @@ namespace CollegeProject.Controllers
                 StudentID = student.StudentID,
                 StudentName = student.StudentName,
                 Email = student.Email,
-                Address = student.Address
+                Address = student.Address,
+                DOB=student.DOB
             };
             return Ok(studentDTO);
         }
@@ -114,7 +119,7 @@ namespace CollegeProject.Controllers
             {
                 return BadRequest();
             }
-            var student = CollegeRepository.Students.Where(temp => temp.StudentName == name).FirstOrDefault();
+            var student = _collegeDBContext.Students.Where(temp => temp.StudentName == name).FirstOrDefault();
             if (student == null)
             {
                 return NotFound($"Student with name = {name} not found");
@@ -146,18 +151,20 @@ namespace CollegeProject.Controllers
             //    return BadRequest(ModelState);
             //}
 
-            int newId = CollegeRepository.Students.LastOrDefault().StudentID + 1;
+            //int newId = CollegeRepository.Students.LastOrDefault().StudentID + 1;
             Student student = new Student()
             {
-                StudentID = newId,
+                //StudentID = newId,
                 StudentName = model.StudentName,
                 Email = model.Email,
-                Address = model.Address
+                Address = model.Address,
+                DOB = model.DOB
                 //age = model.age,
                 //Password = model.Password,
                 //ConfirmPassword = model.ConfirmPassword
             };
-            CollegeRepository.Students.Add(student);
+            _collegeDBContext.Students.Add(student);
+            _collegeDBContext.SaveChanges();
             model.StudentID = student.StudentID;
             //Also returns a new url with whatever id it created. In Swagger you can see it as 'location' field.
             return CreatedAtRoute("GetStudentById", new { id = model.StudentID }, model);
@@ -176,7 +183,7 @@ namespace CollegeProject.Controllers
             {
                 return BadRequest();
             }
-            var existingStudent = CollegeRepository.Students.Where(temp => temp.StudentID == model.StudentID).FirstOrDefault();
+            var existingStudent = _collegeDBContext.Students.Where(temp => temp.StudentID == model.StudentID).FirstOrDefault();
             if(existingStudent == null)
             {
                 return NotFound();
@@ -184,7 +191,8 @@ namespace CollegeProject.Controllers
             existingStudent.StudentName = model.StudentName;
             existingStudent.Email = model.Email;
             existingStudent.Address = model.Address;
-
+            existingStudent.DOB = model.DOB;
+            _collegeDBContext.SaveChanges();
             return NoContent(); //204 success to indicate record updated but no output needed to show
         }
 
@@ -201,7 +209,7 @@ namespace CollegeProject.Controllers
             {
                 return BadRequest();
             }
-            var existingStudent = CollegeRepository.Students.Where(temp => temp.StudentID == studentID).FirstOrDefault();
+            var existingStudent = _collegeDBContext.Students.Where(temp => temp.StudentID == studentID).FirstOrDefault();
             if (existingStudent == null)
             {
                 return NotFound();
@@ -211,7 +219,8 @@ namespace CollegeProject.Controllers
                 StudentID = existingStudent.StudentID,
                 StudentName = existingStudent.StudentName,
                 Email = existingStudent.Email,
-                Address = existingStudent.Address
+                Address = existingStudent.Address,
+                DOB = existingStudent.DOB
             };
             patchDocument.ApplyTo(studentDTO, ModelState);
             if (!ModelState.IsValid)
@@ -221,7 +230,8 @@ namespace CollegeProject.Controllers
             existingStudent.StudentName = studentDTO.StudentName;
             existingStudent.Email = studentDTO.Email;
             existingStudent.Address = studentDTO.Address;
-
+            existingStudent.DOB = studentDTO.DOB;
+            _collegeDBContext.SaveChanges();
             return NoContent(); //204 success to indicate record updated but no output needed to show
         }
 
@@ -238,13 +248,14 @@ namespace CollegeProject.Controllers
             {
                 return BadRequest();
             }
-            var student = CollegeRepository.Students.Where(temp => temp.StudentID == StudentID).FirstOrDefault();
+            var student = _collegeDBContext.Students.Where(temp => temp.StudentID == StudentID).FirstOrDefault();
             if (student == null)
             {
                 return NotFound($"Student with {StudentID} not found");
             }
 
-            CollegeRepository.Students.Remove(student);
+            _collegeDBContext.Students.Remove(student);
+            _collegeDBContext.SaveChanges();
             return Ok(true);
         }
     }
