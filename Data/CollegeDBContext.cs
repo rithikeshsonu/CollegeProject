@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using CollegeProject.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace CollegeProject.Data
 {
@@ -30,6 +31,15 @@ namespace CollegeProject.Data
                     Email = "usa@gmail.com",
                     DOB = new DateTime(2012, 3, 8)
                 }
+            });
+
+            modelBuilder.Entity<Student>(entity =>
+            {
+                entity.Property(n => n.StudentID).IsRequired();
+                entity.Property(n => n.StudentName).IsRequired().HasMaxLength(50);
+                entity.Property(n => n.Address).IsRequired(false).HasMaxLength(400);
+                entity.Property(n => n.Email).IsRequired().HasMaxLength(200);
+                //entity.Property(n => n.Email).IsRequired(false);
             });
         }
     }
