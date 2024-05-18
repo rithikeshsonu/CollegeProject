@@ -1,4 +1,6 @@
+using CollegeProject.Data;
 using CollegeProject.MyLogging;
+using Microsoft.EntityFrameworkCore;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -24,6 +26,12 @@ builder.Logging.AddSerilog(); // To add Serilog logging with other type of exist
 //Clearing existing logging mechanisms 
 builder.Logging.ClearProviders();
 builder.Logging.AddLog4Net();
+
+//configuring sql server connection string feom appsettings.json
+builder.Services.AddDbContext<CollegeDBContext>(options =>
+{
+    options.UseSqlServer(builder.Configuration.GetConnectionString("CollegeAppDBConnection"));
+});
 
 // Add services to the container.
 //Content Negotiation -> How to now allow other response types like xml, bla bla...
