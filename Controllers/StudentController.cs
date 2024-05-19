@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.JsonPatch;
 using CollegeProject.MyLogging;
 using CollegeProject.Data;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 
 namespace CollegeProject.Controllers
 {
@@ -31,12 +32,12 @@ namespace CollegeProject.Controllers
         [HttpGet]
         [Route("All", Name = "GetAllStudents")]
         [ProducesResponseType(200)]
-        public ActionResult<IEnumerable<StudentDTO>> GetStudents()
+        public async Task<ActionResult<IEnumerable<StudentDTO>>> GetStudents()
         {
             //_myLoggerr.Log("Your logging message"); //for custom Dependency Injection
             _logger.LogInformation("Get Students method started");
             //var students = _collegeDBContext.Students; //Entity framework
-            var students = _collegeDBContext.Students.Select(temp => new StudentDTO()
+            var students = await _collegeDBContext.Students.Select(temp => new StudentDTO()
             {
                 StudentID = temp.StudentID,
                 StudentName = temp.StudentName,
@@ -44,7 +45,7 @@ namespace CollegeProject.Controllers
                 Address = temp.Address,
                 //DOB = temp.DOB.ToShortDateString()
                 DOB = temp.DOB
-            }).ToList(); //Added inorder for it to configure with XML
+            }).ToListAsync(); //Added inorder for it to configure with XML
 
             return Ok(students);
             //return "Sample student name";
@@ -78,7 +79,7 @@ namespace CollegeProject.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
         [ProducesResponseType(500)]
-        public ActionResult<StudentDTO> GetStudentById(int id)
+        public async Task<ActionResult<StudentDTO>> GetStudentById(int id)
         {
             if (id <= 0)
             {
@@ -86,7 +87,7 @@ namespace CollegeProject.Controllers
                 return BadRequest();
             }
 
-            var student = _collegeDBContext.Students.Where(temp => temp.StudentID == id).FirstOrDefault();
+            var student = await _collegeDBContext.Students.Where(temp => temp.StudentID == id).FirstOrDefaultAsync();
 
             if (student == null)
             {
@@ -117,13 +118,13 @@ namespace CollegeProject.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public ActionResult<StudentDTO> GetStudentByName(string name)
+        public async Task<ActionResult<StudentDTO>> GetStudentByName(string name)
         {
             if(string.IsNullOrEmpty(name))
             {
                 return BadRequest();
             }
-            var student = _collegeDBContext.Students.Where(temp => temp.StudentName == name).FirstOrDefault();
+            var student = await _collegeDBContext.Students.Where(temp => temp.StudentName == name).FirstOrDefaultAsync();
             if (student == null)
             {
                 return NotFound($"Student with name = {name} not found");
@@ -145,7 +146,7 @@ namespace CollegeProject.Controllers
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(400)]
         [ProducesResponseType(500)]
-        public ActionResult<StudentDTO> CreateStudent([FromBody]StudentDTO model)
+        public async Task<ActionResult<StudentDTO>> CreateStudent([FromBody]StudentDTO model)
         {
             if(model == null) { 
                 return BadRequest();
@@ -172,8 +173,8 @@ namespace CollegeProject.Controllers
                 //Password = model.Password,
                 //ConfirmPassword = model.ConfirmPassword
             };
-            _collegeDBContext.Students.Add(student);
-            _collegeDBContext.SaveChanges();
+            await _collegeDBContext.Students.AddAsync(student);
+            await _collegeDBContext.SaveChangesAsync();
             model.StudentID = student.StudentID;
             //Also returns a new url with whatever id it created. In Swagger you can see it as 'location' field.
             return CreatedAtRoute("GetStudentById", new { id = model.StudentID }, model);
@@ -186,14 +187,14 @@ namespace CollegeProject.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
-        public ActionResult UpdateStudent([FromBody]StudentDTO model)
+        public async Task<ActionResult> UpdateStudent([FromBody]StudentDTO model)
         {
             if(model == null || model.StudentID <= 0)
             {
                 return BadRequest();
             }
             //To not track the existing recors which is tracking our ID in entity framework
-            var existingStudent = _collegeDBContext.Students.AsNoTracking().Where(temp => temp.StudentID == model.StudentID).FirstOrDefault();
+            var existingStudent = await _collegeDBContext.Students.AsNoTracking().Where(temp => temp.StudentID == model.StudentID).FirstOrDefaultAsync();
             if(existingStudent == null)
             {
                 return NotFound();
@@ -215,7 +216,7 @@ namespace CollegeProject.Controllers
             ////existingStudent.DOB = Convert.ToDateTime(model.DOB);
             //existingStudent.DOB = model.DOB;
 
-            _collegeDBContext.SaveChanges();
+            await _collegeDBContext.SaveChangesAsync();
             return NoContent(); //204 success to indicate record updated but no output needed to show
         }
 
@@ -226,13 +227,13 @@ namespace CollegeProject.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
-        public ActionResult PartialUpdateStudent(int studentID, [FromBody] JsonPatchDocument<StudentDTO> patchDocument)
+        public async Task<ActionResult> PartialUpdateStudent(int studentID, [FromBody] JsonPatchDocument<StudentDTO> patchDocument)
         {
             if (patchDocument == null || studentID <= 0)
             {
                 return BadRequest();
             }
-            var existingStudent = _collegeDBContext.Students.Where(temp => temp.StudentID == studentID).FirstOrDefault();
+            var existingStudent = await _collegeDBContext.Students.Where(temp => temp.StudentID == studentID).FirstOrDefaultAsync();
             if (existingStudent == null)
             {
                 return NotFound();
@@ -256,7 +257,7 @@ namespace CollegeProject.Controllers
             existingStudent.Address = studentDTO.Address;
             //existingStudent.DOB =  Convert.ToDateTime(studentDTO.DOB);
             existingStudent.DOB = studentDTO.DOB;
-            _collegeDBContext.SaveChanges();
+            await _collegeDBContext.SaveChangesAsync();
             return NoContent(); //204 success to indicate record updated but no output needed to show
         }
 
@@ -267,20 +268,20 @@ namespace CollegeProject.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public ActionResult<bool> DeleteStudent(int StudentID)
+        public async Task<ActionResult<bool>> DeleteStudent(int StudentID)
         {
             if (StudentID <= 0)
             {
                 return BadRequest();
             }
-            var student = _collegeDBContext.Students.Where(temp => temp.StudentID == StudentID).FirstOrDefault();
+            var student = await _collegeDBContext.Students.Where(temp => temp.StudentID == StudentID).FirstOrDefaultAsync();
             if (student == null)
             {
                 return NotFound($"Student with {StudentID} not found");
             }
 
             _collegeDBContext.Students.Remove(student);
-            _collegeDBContext.SaveChanges();
+            await _collegeDBContext.SaveChangesAsync();
             return Ok(true);
         }
     }
