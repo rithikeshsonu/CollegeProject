@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.JsonPatch;
 using CollegeProject.MyLogging;
 using CollegeProject.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace CollegeProject.Controllers
 {
@@ -191,16 +192,29 @@ namespace CollegeProject.Controllers
             {
                 return BadRequest();
             }
-            var existingStudent = _collegeDBContext.Students.Where(temp => temp.StudentID == model.StudentID).FirstOrDefault();
+            //To not track the existing recors which is tracking our ID in entity framework
+            var existingStudent = _collegeDBContext.Students.AsNoTracking().Where(temp => temp.StudentID == model.StudentID).FirstOrDefault();
             if(existingStudent == null)
             {
                 return NotFound();
             }
-            existingStudent.StudentName = model.StudentName;
-            existingStudent.Email = model.Email;
-            existingStudent.Address = model.Address;
-            //existingStudent.DOB = Convert.ToDateTime(model.DOB);
-            existingStudent.DOB = model.DOB;
+
+            var newStudentRecord = new Student()
+            {
+                StudentID = existingStudent.StudentID,
+                StudentName = model.StudentName,
+                Address = model.Address,
+                DOB = model.DOB,
+                Email = model.Email
+            };
+            _collegeDBContext.Students.Update(newStudentRecord);
+
+            //existingStudent.StudentName = model.StudentName;
+            //existingStudent.Email = model.Email;
+            //existingStudent.Address = model.Address;
+            ////existingStudent.DOB = Convert.ToDateTime(model.DOB);
+            //existingStudent.DOB = model.DOB;
+
             _collegeDBContext.SaveChanges();
             return NoContent(); //204 success to indicate record updated but no output needed to show
         }
