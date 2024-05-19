@@ -34,12 +34,14 @@ namespace CollegeProject.Controllers
         {
             //_myLoggerr.Log("Your logging message"); //for custom Dependency Injection
             _logger.LogInformation("Get Students method started");
+            //var students = _collegeDBContext.Students; //Entity framework
             var students = _collegeDBContext.Students.Select(temp => new StudentDTO()
             {
                 StudentID = temp.StudentID,
                 StudentName = temp.StudentName,
                 Email = temp.Email,
                 Address = temp.Address,
+                //DOB = temp.DOB.ToShortDateString()
                 DOB = temp.DOB
             }).ToList(); //Added inorder for it to configure with XML
 
@@ -96,7 +98,8 @@ namespace CollegeProject.Controllers
                 StudentName = student.StudentName,
                 Email = student.Email,
                 Address = student.Address,
-                DOB=student.DOB
+                //DOB=student.DOB.ToShortDateString()
+                DOB = student.DOB
             };
             return Ok(studentDTO);
         }
@@ -129,7 +132,9 @@ namespace CollegeProject.Controllers
                 StudentID = student.StudentID,
                 StudentName = student.StudentName,
                 Email = student.Email,
-                Address = student.Address
+                Address = student.Address,
+                //DOB = student.DOB.ToShortDateString()
+                DOB = student.DOB
             };
             return Ok(studentDTO);
         }
@@ -159,6 +164,9 @@ namespace CollegeProject.Controllers
                 Email = model.Email,
                 Address = model.Address,
                 DOB = model.DOB
+                //DOB = Convert.ToDateTime(model.DOB)
+                //DOB = model.DOB.ToString("yyyy-MM-dd");
+
                 //age = model.age,
                 //Password = model.Password,
                 //ConfirmPassword = model.ConfirmPassword
@@ -191,6 +199,7 @@ namespace CollegeProject.Controllers
             existingStudent.StudentName = model.StudentName;
             existingStudent.Email = model.Email;
             existingStudent.Address = model.Address;
+            //existingStudent.DOB = Convert.ToDateTime(model.DOB);
             existingStudent.DOB = model.DOB;
             _collegeDBContext.SaveChanges();
             return NoContent(); //204 success to indicate record updated but no output needed to show
@@ -220,6 +229,7 @@ namespace CollegeProject.Controllers
                 StudentName = existingStudent.StudentName,
                 Email = existingStudent.Email,
                 Address = existingStudent.Address,
+                //DOB = existingStudent.DOB.ToShortDateString()
                 DOB = existingStudent.DOB
             };
             patchDocument.ApplyTo(studentDTO, ModelState);
@@ -230,6 +240,7 @@ namespace CollegeProject.Controllers
             existingStudent.StudentName = studentDTO.StudentName;
             existingStudent.Email = studentDTO.Email;
             existingStudent.Address = studentDTO.Address;
+            //existingStudent.DOB =  Convert.ToDateTime(studentDTO.DOB);
             existingStudent.DOB = studentDTO.DOB;
             _collegeDBContext.SaveChanges();
             return NoContent(); //204 success to indicate record updated but no output needed to show
