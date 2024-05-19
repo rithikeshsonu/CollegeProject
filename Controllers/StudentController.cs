@@ -6,6 +6,7 @@ using CollegeProject.MyLogging;
 using CollegeProject.Data;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
+using AutoMapper;
 
 namespace CollegeProject.Controllers
 {
@@ -23,10 +24,12 @@ namespace CollegeProject.Controllers
         */
         private readonly ILogger<StudentController> _logger;
         private readonly CollegeDBContext _collegeDBContext;
-        public StudentController(ILogger<StudentController> logger, CollegeDBContext collegeDBContext)
+        private readonly IMapper _mapper;
+        public StudentController(ILogger<StudentController> logger, CollegeDBContext collegeDBContext, IMapper mapper)
         {
             _logger = logger;
             _collegeDBContext = collegeDBContext;
+            _mapper = mapper;
         }
 
         [HttpGet]
@@ -36,19 +39,21 @@ namespace CollegeProject.Controllers
         {
             //_myLoggerr.Log("Your logging message"); //for custom Dependency Injection
             _logger.LogInformation("Get Students method started");
-            //var students = _collegeDBContext.Students; //Entity framework
-            var students = await _collegeDBContext.Students.Select(temp => new StudentDTO()
-            {
-                StudentID = temp.StudentID,
-                StudentName = temp.StudentName,
-                Email = temp.Email,
-                Address = temp.Address,
-                //DOB = temp.DOB.ToShortDateString()
-                DOB = temp.DOB
-            }).ToListAsync(); //Added inorder for it to configure with XML
+            var students = await _collegeDBContext.Students.ToListAsync(); //Entity framework
+            //var students = await _collegeDBContext.Students.Select(temp => new StudentDTO()
+            //{
+            //    StudentID = temp.StudentID,
+            //    StudentName = temp.StudentName,
+            //    Email = temp.Email,
+            //    Address = temp.Address,
+            //    //DOB = temp.DOB.ToShortDateString()
+            //    DOB = temp.DOB
+            //}).ToListAsync(); //Added inorder for it to configure with XML
 
-            return Ok(students);
+            //return Ok(students);
             //return "Sample student name";
+            var studentDTOData = _mapper.Map<List<StudentDTO>>(students);
+            return Ok(studentDTOData);
         }
 
         //[HttpGet]
@@ -94,15 +99,17 @@ namespace CollegeProject.Controllers
                 _logger.LogError("Student with id not found");
                 return NotFound($"Student with id = {id} not found");
             }
-            var studentDTO = new StudentDTO
-            {
-                StudentID = student.StudentID,
-                StudentName = student.StudentName,
-                Email = student.Email,
-                Address = student.Address,
-                //DOB=student.DOB.ToShortDateString()
-                DOB = student.DOB
-            };
+            //var studentDTO = new StudentDTO
+            //{
+            //    StudentID = student.StudentID,
+            //    StudentName = student.StudentName,
+            //    Email = student.Email,
+            //    Address = student.Address,
+            //    //DOB=student.DOB.ToShortDateString()
+            //    DOB = student.DOB
+            //};
+            //return Ok(studentDTO);
+            var studentDTO = _mapper.Map<StudentDTO>(student);
             return Ok(studentDTO);
         }
 
@@ -129,15 +136,17 @@ namespace CollegeProject.Controllers
             {
                 return NotFound($"Student with name = {name} not found");
             }
-            var studentDTO = new StudentDTO
-            {
-                StudentID = student.StudentID,
-                StudentName = student.StudentName,
-                Email = student.Email,
-                Address = student.Address,
-                //DOB = student.DOB.ToShortDateString()
-                DOB = student.DOB
-            };
+            //var studentDTO = new StudentDTO
+            //{
+            //    StudentID = student.StudentID,
+            //    StudentName = student.StudentName,
+            //    Email = student.Email,
+            //    Address = student.Address,
+            //    //DOB = student.DOB.ToShortDateString()
+            //    DOB = student.DOB
+            //};
+            //return Ok(studentDTO);
+            var studentDTO = _mapper.Map<StudentDTO>(student);
             return Ok(studentDTO);
         }
 
@@ -159,20 +168,21 @@ namespace CollegeProject.Controllers
             //}
 
             //int newId = CollegeRepository.Students.LastOrDefault().StudentID + 1;
-            Student student = new Student()
-            {
-                //StudentID = newId,
-                StudentName = model.StudentName,
-                Email = model.Email,
-                Address = model.Address,
-                DOB = model.DOB
-                //DOB = Convert.ToDateTime(model.DOB)
-                //DOB = model.DOB.ToString("yyyy-MM-dd");
+            //Student student = new Student()
+            //{
+            //    //StudentID = newId,
+            //    StudentName = model.StudentName,
+            //    Email = model.Email,
+            //    Address = model.Address,
+            //    DOB = model.DOB
+            //    //DOB = Convert.ToDateTime(model.DOB)
+            //    //DOB = model.DOB.ToString("yyyy-MM-dd");
 
-                //age = model.age,
-                //Password = model.Password,
-                //ConfirmPassword = model.ConfirmPassword
-            };
+            //    //age = model.age,
+            //    //Password = model.Password,
+            //    //ConfirmPassword = model.ConfirmPassword
+            //};
+            var student = _mapper.Map<Student>(model);
             await _collegeDBContext.Students.AddAsync(student);
             await _collegeDBContext.SaveChangesAsync();
             model.StudentID = student.StudentID;
@@ -200,14 +210,15 @@ namespace CollegeProject.Controllers
                 return NotFound();
             }
 
-            var newStudentRecord = new Student()
-            {
-                StudentID = existingStudent.StudentID,
-                StudentName = model.StudentName,
-                Address = model.Address,
-                DOB = model.DOB,
-                Email = model.Email
-            };
+            //var newStudentRecord = new Student()
+            //{
+            //    StudentID = existingStudent.StudentID,
+            //    StudentName = model.StudentName,
+            //    Address = model.Address,
+            //    DOB = model.DOB,
+            //    Email = model.Email
+            //};
+            var newStudentRecord = _mapper.Map<Student>(model);
             _collegeDBContext.Students.Update(newStudentRecord);
 
             //existingStudent.StudentName = model.StudentName;
@@ -233,30 +244,33 @@ namespace CollegeProject.Controllers
             {
                 return BadRequest();
             }
-            var existingStudent = await _collegeDBContext.Students.Where(temp => temp.StudentID == studentID).FirstOrDefaultAsync();
+            var existingStudent = await _collegeDBContext.Students.AsNoTracking().Where(temp => temp.StudentID == studentID).FirstOrDefaultAsync();
             if (existingStudent == null)
             {
                 return NotFound();
             }
-            var studentDTO = new StudentDTO
-            {
-                StudentID = existingStudent.StudentID,
-                StudentName = existingStudent.StudentName,
-                Email = existingStudent.Email,
-                Address = existingStudent.Address,
-                //DOB = existingStudent.DOB.ToShortDateString()
-                DOB = existingStudent.DOB
-            };
+            //var studentDTO = new StudentDTO
+            //{
+            //    StudentID = existingStudent.StudentID,
+            //    StudentName = existingStudent.StudentName,
+            //    Email = existingStudent.Email,
+            //    Address = existingStudent.Address,
+            //    //DOB = existingStudent.DOB.ToShortDateString()
+            //    DOB = existingStudent.DOB
+            //};
+            var studentDTO = _mapper.Map<StudentDTO>(existingStudent);
             patchDocument.ApplyTo(studentDTO, ModelState);
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-            existingStudent.StudentName = studentDTO.StudentName;
-            existingStudent.Email = studentDTO.Email;
-            existingStudent.Address = studentDTO.Address;
-            //existingStudent.DOB =  Convert.ToDateTime(studentDTO.DOB);
-            existingStudent.DOB = studentDTO.DOB;
+            existingStudent = _mapper.Map<Student>(studentDTO);
+            _collegeDBContext.Students.Update(existingStudent);
+            //existingStudent.StudentName = studentDTO.StudentName;
+            //existingStudent.Email = studentDTO.Email;
+            //existingStudent.Address = studentDTO.Address;
+            ////existingStudent.DOB =  Convert.ToDateTime(studentDTO.DOB);
+            //existingStudent.DOB = studentDTO.DOB;
             await _collegeDBContext.SaveChangesAsync();
             return NoContent(); //204 success to indicate record updated but no output needed to show
         }
