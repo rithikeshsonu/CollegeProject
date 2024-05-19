@@ -13,7 +13,7 @@ namespace CollegeProject.Data.Config
             builder.Property(x => x.StudentID).IsRequired();
             builder.Property(x => x.StudentName).IsRequired().HasMaxLength(50);
             builder.Property(x => x.Address).IsRequired(false).HasMaxLength(400);
-            builder.Property(x => x.Email).IsRequired().HasMaxLength(200);
+            builder.Property(x => x.Email).IsRequired(false).HasMaxLength(200);
 
             builder.HasData(new List<Student>()
             {
