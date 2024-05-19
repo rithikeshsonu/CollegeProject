@@ -1,6 +1,9 @@
+using AutoMapper;
+using CollegeProject.Configurations;
 using CollegeProject.Data;
 using CollegeProject.MyLogging;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -33,6 +36,7 @@ builder.Services.AddDbContext<CollegeDBContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("CollegeAppDBConnection"));
 });
 
+
 // Add services to the container.
 //Content Negotiation -> How to now allow other response types like xml, bla bla...
 //Shows 406 Status Code -> Which means not acceptable data format when trying to return other types apart from JSON.
@@ -42,6 +46,11 @@ builder.Services.AddControllers(options => options.ReturnHttpNotAcceptable = tru
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+//builder.Services.AddAutoMapper(typeof(AutomapperConfig));
+builder.Services.AddAutoMapper(typeof(AutomapperConfig));
+//builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
 
 //For loosely coupled Dependency Injection - You will just have to make your changes at one place...
 //Easier to maintain
