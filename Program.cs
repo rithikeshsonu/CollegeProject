@@ -57,7 +57,7 @@ builder.Services.AddAutoMapper(typeof(AutomapperConfig));
 //Easier to maintain
 builder.Services.AddScoped<IMyLoggerr, LogToFile>();
 builder.Services.AddScoped<IStudentRepository, StudentRepository>();
-
+builder.Services.AddScoped(typeof(ICollegeRepository<>), typeof(CollegeRepository<>)); //Common generic Repository which you can use to inject any repository,
 
 var app = builder.Build();
 
