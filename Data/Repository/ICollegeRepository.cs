@@ -9,6 +9,6 @@ namespace CollegeProject.Data.Repository
         Task<T> GetByName(Expression<Func<T, bool>> filter);
         Task<T> Create(T dbRecord);
         Task<T> Update(T dbRecord);
-        Task<bool> DeleteStudent(T dbRecord);
+        Task<bool> Delete(T dbRecord);
     }
 }

@@ -312,7 +312,7 @@ namespace CollegeProject.Controllers
 
             //_collegeDBContext.Students.Remove(student);
             //await _collegeDBContext.SaveChangesAsync();
-            await _studentRepository.DeleteStudent(student);
+            await _studentRepository.Delete(student);
             return Ok(true);
         }
     }

@@ -12,18 +12,6 @@ namespace CollegeProject.Data.Repository
             _collegeDBContext = collegeDBContext;
             _dbSet = _collegeDBContext.Set<T>();
         }
-        public async Task<T> Create(T dbRecord)
-        {
-            await _dbSet.AddAsync(dbRecord);
-            await _collegeDBContext.SaveChangesAsync();
-            return dbRecord;
-        }
-        public async Task<bool> DeleteStudent(T dbRecord)
-        {
-            _dbSet.Remove(dbRecord);
-            await _collegeDBContext.SaveChangesAsync();
-            return true;
-        }
         public async Task<List<T>> GetAll()
         {
             return await _dbSet.ToListAsync();
@@ -43,11 +31,23 @@ namespace CollegeProject.Data.Repository
         {
             return await _dbSet.Where(filter).FirstOrDefaultAsync();
         }
+        public async Task<T> Create(T dbRecord)
+        {
+            await _dbSet.AddAsync(dbRecord);
+            await _collegeDBContext.SaveChangesAsync();
+            return dbRecord;
+        }
         public async Task<T> Update(T dbRecord)
         {
             _collegeDBContext.Update(dbRecord);
             await _collegeDBContext.SaveChangesAsync();
             return dbRecord;
+        }
+        public async Task<bool> Delete(T dbRecord)
+        {
+            _dbSet.Remove(dbRecord);
+            await _collegeDBContext.SaveChangesAsync();
+            return true;
         }
     }
 }
