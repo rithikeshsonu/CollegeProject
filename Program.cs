@@ -1,6 +1,7 @@
 using AutoMapper;
 using CollegeProject.Configurations;
 using CollegeProject.Data;
+using CollegeProject.Data.Repository;
 using CollegeProject.MyLogging;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -55,6 +56,8 @@ builder.Services.AddAutoMapper(typeof(AutomapperConfig));
 //For loosely coupled Dependency Injection - You will just have to make your changes at one place...
 //Easier to maintain
 builder.Services.AddScoped<IMyLoggerr, LogToFile>();
+builder.Services.AddScoped<IStudentRepository, StudentRepository>();
+
 
 var app = builder.Build();
 

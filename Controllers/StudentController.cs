@@ -7,6 +7,7 @@ using CollegeProject.Data;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using AutoMapper;
+using CollegeProject.Data.Repository;
 
 namespace CollegeProject.Controllers
 {
@@ -23,13 +24,16 @@ namespace CollegeProject.Controllers
         }
         */
         private readonly ILogger<StudentController> _logger;
-        private readonly CollegeDBContext _collegeDBContext;
+        //private readonly CollegeDBContext _collegeDBContext;
         private readonly IMapper _mapper;
-        public StudentController(ILogger<StudentController> logger, CollegeDBContext collegeDBContext, IMapper mapper)
+        private readonly IStudentRepository _studentRepository;
+        //public StudentController(ILogger<StudentController> logger, CollegeDBContext collegeDBContext, IMapper mapper)
+        public StudentController(ILogger<StudentController> logger, IMapper mapper, IStudentRepository studentRepository)
         {
             _logger = logger;
-            _collegeDBContext = collegeDBContext;
+            //_collegeDBContext = collegeDBContext;
             _mapper = mapper;
+            _studentRepository = studentRepository;
         }
 
         [HttpGet]
@@ -39,7 +43,8 @@ namespace CollegeProject.Controllers
         {
             //_myLoggerr.Log("Your logging message"); //for custom Dependency Injection
             _logger.LogInformation("Get Students method started");
-            var students = await _collegeDBContext.Students.ToListAsync(); //Entity framework
+            //var students = await _collegeDBContext.Students.ToListAsync(); //Entity framework
+            var students = await _studentRepository.GetAll();
             //var students = await _collegeDBContext.Students.Select(temp => new StudentDTO()
             //{
             //    StudentID = temp.StudentID,
@@ -92,8 +97,8 @@ namespace CollegeProject.Controllers
                 return BadRequest();
             }
 
-            var student = await _collegeDBContext.Students.Where(temp => temp.StudentID == id).FirstOrDefaultAsync();
-
+            //var student = await _collegeDBContext.Students.Where(temp => temp.StudentID == id).FirstOrDefaultAsync();
+            var student = await _studentRepository.GetById(id);
             if (student == null)
             {
                 _logger.LogError("Student with id not found");
@@ -131,7 +136,9 @@ namespace CollegeProject.Controllers
             {
                 return BadRequest();
             }
-            var student = await _collegeDBContext.Students.Where(temp => temp.StudentName == name).FirstOrDefaultAsync();
+            //var student = await _collegeDBContext.Students.Where(temp => temp.StudentName == name).FirstOrDefaultAsync();
+            var student = await _studentRepository.GetByName(name);
+
             if (student == null)
             {
                 return NotFound($"Student with name = {name} not found");
@@ -182,10 +189,11 @@ namespace CollegeProject.Controllers
             //    //Password = model.Password,
             //    //ConfirmPassword = model.ConfirmPassword
             //};
-            var student = _mapper.Map<Student>(model);
-            await _collegeDBContext.Students.AddAsync(student);
-            await _collegeDBContext.SaveChangesAsync();
-            model.StudentID = student.StudentID;
+            Student student = _mapper.Map<Student>(model);
+            //await _collegeDBContext.Students.AddAsync(student);
+            //await _collegeDBContext.SaveChangesAsync();
+            var id = await _studentRepository.Create(student);
+            model.StudentID = id;
             //Also returns a new url with whatever id it created. In Swagger you can see it as 'location' field.
             return CreatedAtRoute("GetStudentById", new { id = model.StudentID }, model);
             //return Ok(model);
@@ -204,7 +212,8 @@ namespace CollegeProject.Controllers
                 return BadRequest();
             }
             //To not track the existing recors which is tracking our ID in entity framework
-            var existingStudent = await _collegeDBContext.Students.AsNoTracking().Where(temp => temp.StudentID == model.StudentID).FirstOrDefaultAsync();
+            //var existingStudent = await _collegeDBContext.Students.AsNoTracking().Where(temp => temp.StudentID == model.StudentID).FirstOrDefaultAsync();
+            var existingStudent = await _studentRepository.GetById(model.StudentID, true);
             if(existingStudent == null)
             {
                 return NotFound();
@@ -219,7 +228,7 @@ namespace CollegeProject.Controllers
             //    Email = model.Email
             //};
             var newStudentRecord = _mapper.Map<Student>(model);
-            _collegeDBContext.Students.Update(newStudentRecord);
+            //_collegeDBContext.Students.Update(newStudentRecord);
 
             //existingStudent.StudentName = model.StudentName;
             //existingStudent.Email = model.Email;
@@ -227,7 +236,8 @@ namespace CollegeProject.Controllers
             ////existingStudent.DOB = Convert.ToDateTime(model.DOB);
             //existingStudent.DOB = model.DOB;
 
-            await _collegeDBContext.SaveChangesAsync();
+            //await _collegeDBContext.SaveChangesAsync();
+            await _studentRepository.Update(newStudentRecord);
             return NoContent(); //204 success to indicate record updated but no output needed to show
         }
 
@@ -244,7 +254,8 @@ namespace CollegeProject.Controllers
             {
                 return BadRequest();
             }
-            var existingStudent = await _collegeDBContext.Students.AsNoTracking().Where(temp => temp.StudentID == studentID).FirstOrDefaultAsync();
+            //var existingStudent = await _collegeDBContext.Students.AsNoTracking().Where(temp => temp.StudentID == studentID).FirstOrDefaultAsync();
+            var existingStudent = await _studentRepository.GetById(studentID, true);
             if (existingStudent == null)
             {
                 return NotFound();
@@ -265,13 +276,14 @@ namespace CollegeProject.Controllers
                 return BadRequest(ModelState);
             }
             existingStudent = _mapper.Map<Student>(studentDTO);
-            _collegeDBContext.Students.Update(existingStudent);
+            //_collegeDBContext.Students.Update(existingStudent);
             //existingStudent.StudentName = studentDTO.StudentName;
             //existingStudent.Email = studentDTO.Email;
             //existingStudent.Address = studentDTO.Address;
             ////existingStudent.DOB =  Convert.ToDateTime(studentDTO.DOB);
             //existingStudent.DOB = studentDTO.DOB;
-            await _collegeDBContext.SaveChangesAsync();
+            //await _collegeDBContext.SaveChangesAsync();
+            await _studentRepository.Update(existingStudent);
             return NoContent(); //204 success to indicate record updated but no output needed to show
         }
 
@@ -288,14 +300,16 @@ namespace CollegeProject.Controllers
             {
                 return BadRequest();
             }
-            var student = await _collegeDBContext.Students.Where(temp => temp.StudentID == StudentID).FirstOrDefaultAsync();
+            //var student = await _collegeDBContext.Students.Where(temp => temp.StudentID == StudentID).FirstOrDefaultAsync();
+            var student = await _studentRepository.GetById(StudentID);
             if (student == null)
             {
                 return NotFound($"Student with {StudentID} not found");
             }
 
-            _collegeDBContext.Students.Remove(student);
-            await _collegeDBContext.SaveChangesAsync();
+            //_collegeDBContext.Students.Remove(student);
+            //await _collegeDBContext.SaveChangesAsync();
+            await _studentRepository.DeleteStudent(student);
             return Ok(true);
         }
     }
