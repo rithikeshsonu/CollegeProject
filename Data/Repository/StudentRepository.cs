@@ -6,11 +6,9 @@ namespace CollegeProject.Data.Repository
     public class StudentRepository : IStudentRepository
     {
         private readonly CollegeDBContext _collegeDBContext;
-
         public StudentRepository(CollegeDBContext collegeDBContext)
         {
             _collegeDBContext = collegeDBContext;
-
         }
         public async Task<List<Student>> GetAll()
         {
@@ -50,7 +48,5 @@ namespace CollegeProject.Data.Repository
             await _collegeDBContext.SaveChangesAsync();
             return true;
         }
-
-
     }
 }

@@ -11,7 +11,6 @@ namespace CollegeProject.Data
 
         }
         public DbSet<Student> Students { get; set; }
-
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             //table 1
@@ -46,7 +45,6 @@ namespace CollegeProject.Data
                 //entity.Property(n => n.Email).IsRequired(false);
             //});
             */
-
         }
     }
 }

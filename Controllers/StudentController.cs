@@ -31,7 +31,6 @@ namespace CollegeProject.Controllers
         //public StudentController(ILogger<StudentController> logger, CollegeDBContext collegeDBContext, IMapper mapper)
         //public StudentController(ILogger<StudentController> logger, IMapper mapper, IStudentRepository studentRepository)
         public StudentController(ILogger<StudentController> logger, IMapper mapper, ICollegeRepository<Student> studentRepository)
-
         {
             _logger = logger;
             //_collegeDBContext = collegeDBContext;
@@ -39,6 +38,7 @@ namespace CollegeProject.Controllers
             _studentRepository = studentRepository;
         }
 
+        #region Get - Endpoint - GetStudents
         [HttpGet]
         [Route("All", Name = "GetAllStudents")]
         [ProducesResponseType(200)]
@@ -63,6 +63,7 @@ namespace CollegeProject.Controllers
             var studentDTOData = _mapper.Map<List<StudentDTO>>(students);
             return Ok(studentDTOData);
         }
+        #endregion
 
         //[HttpGet]
         //[Route("{id:int:range(1, 10)}", Name = "GetStudentById")]
@@ -86,8 +87,9 @@ namespace CollegeProject.Controllers
         //    return Ok(student);
         //}
 
+        #region Get - Endpoint-GetStudentsById
         [HttpGet]
-        [Route("{id:int:range(1, 10)}", Name = "GetStudentById")]
+        [Route("{id:int:range(1, 100)}", Name = "GetStudentById")]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
         [ProducesResponseType(404)]
@@ -120,7 +122,9 @@ namespace CollegeProject.Controllers
             var studentDTO = _mapper.Map<StudentDTO>(student);
             return Ok(studentDTO);
         }
+        #endregion
 
+        #region Get - Endpoint-GetStudentByName
         [HttpGet]
         //[Route("{name:regex(^[A-Za-z0-9\\- ]+$)}", Name = "GetStudentByName")]
         //api/[controller]/{name:regex(^[A-Za-z0-9\- ]+$)}
@@ -159,7 +163,9 @@ namespace CollegeProject.Controllers
             var studentDTO = _mapper.Map<StudentDTO>(student);
             return Ok(studentDTO);
         }
+        #endregion
 
+        #region Post - Endpoint - CreateStudent
         [HttpPost]
         [Route("Create")]
         [ProducesResponseType(StatusCodes.Status201Created)]
@@ -202,6 +208,9 @@ namespace CollegeProject.Controllers
             //return Ok(model);
         }
 
+        #endregion
+
+        #region Put - Endpoint - UpdateStudent
         [HttpPut]
         [Route("Update")]
         //api/student/update
@@ -243,7 +252,9 @@ namespace CollegeProject.Controllers
             await _studentRepository.Update(newStudentRecord);
             return NoContent(); //204 success to indicate record updated but no output needed to show
         }
+        #endregion
 
+        #region Patch - Endpoint - UpdatePartial
         //We need to install two libraries - JSONPatch and NewtonsoftJson from Nuget Package Manager
         [HttpPatch]
         [Route("{studentID:int}/UpdatePartial")]
@@ -290,6 +301,10 @@ namespace CollegeProject.Controllers
             return NoContent(); //204 success to indicate record updated but no output needed to show
         }
 
+        #endregion
+
+        #region Delete - Endpoint - DeleteStudent
+
         [HttpDelete]
         [Route("Delete/{StudentID}", Name = "DeleteStudentById")]
         //Student/Delete/{StudentID}
@@ -315,5 +330,6 @@ namespace CollegeProject.Controllers
             await _studentRepository.Delete(student);
             return Ok(true);
         }
+        #endregion
     }
 }
