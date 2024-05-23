@@ -11,10 +11,13 @@ namespace CollegeProject.Data
 
         }
         public DbSet<Student> Students { get; set; }
+        public DbSet<Department> Departments { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             //table 1
             modelBuilder.ApplyConfiguration(new StudentConfig());
+            modelBuilder.ApplyConfiguration(new DepartmentConfig());
+
             /*
             //modelBuilder.Entity<Student>().HasData(new List<Student>() 
             //{
