@@ -16,7 +16,7 @@ namespace CollegeProject.Data.Repository
         {
             return await _dbSet.ToListAsync();
         }
-        public async Task<T> GetById(Expression<Func<T, bool>> filter, bool useNoTracking = false)
+        public async Task<T> Get(Expression<Func<T, bool>> filter, bool useNoTracking = false)
         {
             if (useNoTracking)
             {
@@ -27,10 +27,11 @@ namespace CollegeProject.Data.Repository
                 return await _dbSet.Where(filter).FirstOrDefaultAsync();
             }
         }
-        public async Task<T> GetByName(Expression<Func<T, bool>> filter)
-        {
-            return await _dbSet.Where(filter).FirstOrDefaultAsync();
-        }
+        //as we are already using the same above
+        //public async Task<T> GetByName(Expression<Func<T, bool>> filter)
+        //{
+        //    return await _dbSet.Where(filter).FirstOrDefaultAsync();
+        //}
         public async Task<T> Create(T dbRecord)
         {
             await _dbSet.AddAsync(dbRecord);

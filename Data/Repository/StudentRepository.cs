@@ -1,15 +1,27 @@
 ﻿
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 
 namespace CollegeProject.Data.Repository
 {
-    public class StudentRepository : IStudentRepository
+    public class StudentRepository : CollegeRepository<Student>, IStudentRepository
     {
         private readonly CollegeDBContext _collegeDBContext;
-        public StudentRepository(CollegeDBContext collegeDBContext)
+        public StudentRepository(CollegeDBContext collegeDBContext) : base(collegeDBContext) 
         {
             _collegeDBContext = collegeDBContext;
         }
+
+        public Task<List<Student>> GetStudentsByFeeStatus(int feeStatus)
+        {
+            //throw new NotImplementedException();
+            //Logic
+            return null;
+
+        }
+
+        //As we have created the same functionality in common repository, removing this code
+        /*
         public async Task<List<Student>> GetAll()
         {
             return await _collegeDBContext.Students.ToListAsync();
@@ -48,5 +60,6 @@ namespace CollegeProject.Data.Repository
             await _collegeDBContext.SaveChangesAsync();
             return true;
         }
+        */
     }
 }
